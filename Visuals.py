@@ -38,7 +38,7 @@ def load_and_prepare_data(paths):
                     if filename == "log_anthropic_claude-3.5-sonnet.csv":
                         filename = "log_anthropic_claude-3-5-sonnet-20241022.csv"
                     df["Modellname"] = filename.replace("log_", "").replace(".csv", "")
-                    df["run"] = run_number  # Füge die Run-Nummer hinzu
+                    df["run"] = run_name  # Füge die Run-Nummer hinzu
                     df_list.append(df)
 
     # Kombiniere die DataFrames
@@ -57,7 +57,7 @@ def load_and_prepare_data(paths):
     df["solution"] = df["Iteration 1"]
     # add column which is true if iteration 1 or 2 is true
     df['solution_final_it12'] = df[['Iteration 1', 'Iteration 2']].any(axis=1)
-    df['solution_final'] = df[['Iteration 1', 'Iteration 2', 'Iteration 3']].any(axis=1)
+    df['solution_final_it123'] = df[['Iteration 1', 'Iteration 2', 'Iteration 3']].any(axis=1)
 
     #filter df column Task to only contain elements which start with "Task"
     df = df[df['Task'].str.startswith("Task")]
@@ -65,10 +65,12 @@ def load_and_prepare_data(paths):
     return df
 
 
-def plot_mean_success_rate(df):
+def plot_mean_success_rate(df, run_name_I, run_name_II, run_name_III):
     """Plottet die durchschnittliche Erfolgsrate pro Modell
     und Temperatur über alle Runs als Balkendiagramm.
     """
+    # df filtern auf die drei runs
+    df= df[df['run'].isin([run_name_I, run_name_II, run_name_III])]
     # Berechne die durchschnittliche Erfolgsrate pro Modell, Temperatur und Run
     mean_success_rate = df.groupby(["Modellname", "temperature", "run"])["solution"].mean().reset_index()
 
@@ -168,14 +170,14 @@ def plot_mean_success_rate(df):
     # Diagramm anzeigen
     plt.show()
 
-def plot_mean_success_rate_per_iteration(df, temperature):
+def plot_mean_success_rate_per_iteration(df, temperature, run_name):
     """Plottet die durchschnittliche Erfolgsrate pro Modell
     und Iteration für t=0 über alle Runs als Balkendiagramm.
     Berücksichtigt die kumulierte Erfolgsrate ab Iteration 2 über alle Runs.
     """
     # Filtere Daten für t=0
     df_t0 = df[df["temperature"] == temperature].copy()
-
+    df_t0 = df_t0[df_t0["run"] == run_name]
     # Extrahiere Iterationsnummern
     iterations = [col for col in df_t0.columns if "Iteration" in col]
 
@@ -281,9 +283,6 @@ def plot_mean_success_rate_per_iteration(df, temperature):
 
     # Layout anpassen
     fig.tight_layout()
-
-    # Diagramm speichern mit höherer Auflösung
-    plt.savefig("balkendiagramm.png", dpi=300)
 
     # Diagramm anzeigen
     plt.show()
@@ -398,7 +397,7 @@ def plot_success_rate_by_error_and_temperature(df):
         modell_df = modell_df.sort_values("temperature")
 
 
-def plot_success_rate_by_prompt(df):
+def plot_success_rate_by_prompt(df, run_name_I, run_name_II):
     """
     Erstellt ein Balkendiagramm, das die Erfolgsraten der Modelle für Prompt A und Prompt B
     bei t=0 und Iteration 1 darstellt.
@@ -408,7 +407,7 @@ def plot_success_rate_by_prompt(df):
     """
 
     # Filtere die Daten: nur t=0 und Iteration 1
-    filtered_data = df[(df["temperature"] == 0) & (df["run"].isin([1, 4]))]
+    filtered_data = df[(df["temperature"] == 0) & df["run"].isin([run_name_I, run_name_II])]
 
     # Berechne die durchschnittliche Erfolgsrate pro Modell und Prompt
     mean_success_rate = (
@@ -492,82 +491,18 @@ def plot_success_rate_by_prompt(df):
     # Diagramm anzeigen
     plt.show()
 
-
-def plot_task_model_iterations(df):
-    """
-    Erstellt eine Heatmap, die für jede Aufgabe und jedes Modell darstellt,
-    in welcher Iteration eine Lösung erreicht wurde. Farben:
-    - Grün: Iteration 1
-    - Gelb: Iteration 2
-    - Blau: Iteration 3
-    - Rot: Keine Lösung
-    """
-    # Liste der Iterationen
-    iterations = ['Iteration 1', 'Iteration 2', 'Iteration 3']
-
-    # Erstelle eine neue Spalte, die die erste erfolgreiche Iteration angibt
-    def get_first_success(row):
-        for i, iter_col in enumerate(iterations, start=1):
-            if row.get(iter_col, False):
-                return i
-        return 4  # 4 bedeutet keine Lösung
-
-    df['first_success_iteration'] = df.apply(get_first_success, axis=1)
-
-    # Pivot-Tabelle erstellen: Zeilen = Modelle, Spalten = Aufgaben, Werte = Iterationsnummer
-    pivot_df = df.pivot_table(index='Modellname', columns='Task', values='first_success_iteration', fill_value=4)
-
-    # Sicherstellen, dass die Aufgaben in der richtigen Reihenfolge sind
-    sorted_tasks = sorted(pivot_df.columns, key=lambda x: int(x.replace('Task', '')))
-    pivot_df = pivot_df[sorted_tasks]
-
-    # Farben definieren
-    cmap = mcolors.ListedColormap(['green', 'yellow', 'blue', 'red'])
-    bounds = [1, 2, 3, 4, 5]
-    norm = mcolors.BoundaryNorm(bounds, cmap.N)
-
-    # Plot erstellen
-    fig, ax = plt.subplots(figsize=(20, 8))
-
-    c = ax.imshow(pivot_df, aspect='auto', cmap=cmap, norm=norm)
-
-    # Achsenbeschriftungen setzen
-    ax.set_xlabel('Aufgaben', fontsize=14)
-    ax.set_ylabel('Modelle', fontsize=14)
-    ax.set_title('Lösungsiteration je Modell und Aufgabe', fontsize=16)
-
-    # X-Ticks einstellen
-    ax.set_xticks(range(len(sorted_tasks)))
-    ax.set_xticklabels(sorted_tasks, rotation=90, fontsize=8)
-
-    # Y-Ticks einstellen
-    ax.set_yticks(range(len(pivot_df.index)))
-    ax.set_yticklabels(pivot_df.index, fontsize=10)
-
-    # Legende erstellen
-    from matplotlib.patches import Patch
-    legend_elements = [
-        Patch(facecolor='green', edgecolor='black', label='Iteration 1'),
-        Patch(facecolor='yellow', edgecolor='black', label='Iteration 2'),
-        Patch(facecolor='blue', edgecolor='black', label='Iteration 3'),
-        Patch(facecolor='red', edgecolor='black', label='Keine Lösung')
-    ]
-    ax.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left', title='Iterationsstatus')
-
-    plt.tight_layout()
-    plt.show()
-
-def plot_success_rate_by_error_and_model(df):
+def plot_success_rate_by_error_and_model(df, run_name, iteration):
     """
     Erstellt ein Balkendiagramm mit separaten Balken für jede Modell-Fehler-Kombination.
     Modellname einmal pro Gruppe, Farben nach Fehlertyp, korrekte Legende an bbox (1,1).
     """
+
     # Daten filtern
-    filtered_data = df[(df["temperature"] == 0) & (df['solution_final_it12'] == True)]
+    filtered_data = df[(df["temperature"] == 0) & (df[iteration] == True) & (df['run'] == run_name)]
 
     # Erfolge zählen und Erfolgsrate berechnen
-    success_counts = filtered_data.groupby(["Modellname", "error"])['solution_final_it12'].sum().reset_index()
-    success_counts["success_rate"] = (success_counts['solution_final_it12'] / 20) * 100
+    success_counts = filtered_data.groupby(["Modellname", "error"])[iteration].sum().reset_index()
+    success_counts["success_rate"] = (success_counts[iteration] / 20) * 100
 
     # Farben für die Fehler (nur die drei vorgegebenen)
     error_colors = {
@@ -654,7 +589,7 @@ def plot_success_rate_by_error_and_model(df):
     # Diagramm anzeigen
     plt.show()
 
-def plot_task_model_iterations(df):
+def plot_task_model_iterations(df, run_name):
     """
     Erstellt eine Heatmap, die für jede Aufgabe und jedes Modell darstellt,
     in welcher Iteration eine Lösung erreicht wurde.
@@ -663,7 +598,7 @@ def plot_task_model_iterations(df):
         df: Pandas DataFrame mit den Spalten 'Modellname', 'Task', 'Iteration 1', 'Iteration 2', 'Iteration 3'.
             Die Werte in den Iterationsspalten sollten Booleans sein (True für Erfolg, False für Misserfolg).
     """
-
+    df = df[df['run'] == run_name]
     # Validierung des DataFrames
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df muss ein Pandas DataFrame sein.")
@@ -743,7 +678,7 @@ def plot_task_model_iterations(df):
 
     plt.show()
 
-def plot_iteration_scores(df, run_name="Prompt A run 1", temperature=0, sort_by_score=True):
+def plot_iteration_scores(df, run_name, temperature, sort_by_score=True):
     """
     Erstellt ein Balkendiagramm, das die Punktzahl pro Modell basierend auf der Lösungsiteration visualisiert.
     3 Punkte für Lösung in Iteration 1, 2 Punkte für Iteration 2, 1 Punkt für Iteration 3, 0 Punkte für keine Lösung.
@@ -754,8 +689,8 @@ def plot_iteration_scores(df, run_name="Prompt A run 1", temperature=0, sort_by_
         temperature: Die Temperatur.
         sort_by_score: Gibt an, ob nach Punktzahl sortiert werden soll (Standard: True).
     """
-
-    filtered_df = df[(df["run"] == int(run_name.split()[-1])) & (df["temperature"] == temperature)].copy()
+    # Daten filtern
+    filtered_df = df[(df['run'] == run_name) & (df['temperature'] == temperature)]
     iterations = ['Iteration 1', 'Iteration 2', 'Iteration 3']
     model_scores = {}
 
@@ -817,39 +752,34 @@ if __name__ == "__main__":
     paths = [
         r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 1",
         r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 2",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 3"
-    ]
-    paths_plot_overall = [
-    r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 1",
-    r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 2",
-    r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 3",
-    r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt B run 1"
+        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 3",
+        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt B run 1"
     ]
 
     prepared_data = load_and_prepare_data(paths)
-    prepared_data_plot_overall = load_and_prepare_data(paths_plot_overall)
 
 
-    # Liniendiagramm der durchschnittlichen Erfolgsraten plotten
-    #plot_mean_success_rate(prepared_data)
 
-    # Liniendiagramm der durchschnittlichen Erfolgsraten pro Iteration für t=0 plotten
+    # Liniendiagramm der durchschnittlichen Erfolgsraten je Temeratur plotten über alle Runs (Prompt A) in paths
+    #plot_mean_success_rate(prepared_data, "Prompt A run 1", "Prompt A run 2", "Prompt A run 3")
+
+    # Liniendiagramm der durchschnittlichen Erfolgsraten pro Iteration für t=0, 0.5 und 1 plotten
     #for temperature in [0, 0.5, 1]:
-        #plot_mean_success_rate_per_iteration(prepared_data, temperature)
+        #plot_mean_success_rate_per_iteration(prepared_data, temperature, "Prompt A run 1")
 
     # 3) Neues Balkendiagramm mit "Gesamtüberblick" über alle Bedingungen
-    #plot_overall_success_rate(prepared_data_plot_overall)
+    #plot_overall_success_rate(prepared_data)
 
     # Balkendiagramm der Erfolgsraten für Prompt A und Prompt B
-    #plot_success_rate_by_prompt(prepared_data_plot_overall)
+    #plot_success_rate_by_prompt(prepared_data, "Prompt A run 1", "Prompt B run 1")
 
     # Balkendiagramm der Erfolgsraten je Error je Modell
-    plot_success_rate_by_error_and_model(prepared_data)
+    #plot_success_rate_by_error_and_model(prepared_data, "Prompt A run 1", "solution") # Variable die je Iteration berechnet. Ändern auf solution_final_it12 für Iteration 1 & 2 und auf solution_final_it123 für alle Iterationen
 
     #Heatmap der Lösungsiterationen je Modell und Aufgabe
-    plot_task_model_iterations(prepared_data)
+    #plot_task_model_iterations(prepared_data,"Prompt A run 1")
+
 
     # Neuer Plot für die Punktzahlen
-    plot_iteration_scores(prepared_data)  # Standardwerte
-    plot_iteration_scores(prepared_data, run_name="Prompt A run 1", temperature=0.0)  # anderer Temperaturwert
+    plot_iteration_scores(prepared_data, "Prompt A run 1", 0.0)  # anderer Temperaturwert
 
