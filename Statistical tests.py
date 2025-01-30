@@ -4,12 +4,12 @@ from statsmodels.stats.contingency_tables import mcnemar, cochrans_q
 import statsmodels.stats.multitest as multi
 import numpy as np
 from scipy.stats import binom
+import statsmodels.stats.proportion as smp
 
 
+# Lädt die CSV-Dateien aus den angegebenen Verzeichnissen und erstellt ein gemeinsames DataFrame.
 def load_and_prepare_data(paths):
-    """
-    Lädt die CSV-Dateien aus den angegebenen Verzeichnissen und erstellt ein gemeinsames DataFrame.
-    """
+
     df_list = []
 
     for path in paths:
@@ -41,13 +41,13 @@ def load_and_prepare_data(paths):
 
     # DF Spalte Task filtern, sodass nur Daten enthalten sind, die mit Task_ beginnen
     df = df[df["Task"].str.startswith("Task")]
-    df.to_csv("prepared_data.csv", index=False)
+
     return df
 
+
+# Führt pro Modell (innerhalb eines Runs) einen Cochran's Q-Test durch (für Temperaturvergleich).
 def perform_cochrans_q_test_by_model(df, run_name):
-    """
-    Führt pro Modell (innerhalb eines Runs) einen Cochran's Q-Test durch (für Temperaturvergleich).
-    """
+
     results = []
     run_data = df[df["run"] == run_name]
     models = run_data["Modellname"].unique()
@@ -86,11 +86,9 @@ def perform_cochrans_q_test_by_model(df, run_name):
     return results
 
 
+# Führt einen McNemar-Test durch, um den Unterschied zwischen zwei Prompts zu evaluieren.,
 def perform_mcnemar_test_by_prompt(df, run_name_I, run_name_II):
-    """
-    Führt einen McNemar-Test durch, wenn die Daten binär (True/False) sind.
-    Stellt sicher, dass die Gruppierung nach Modellname und Aufgabe korrekt erfolgt.
-    """
+
     results = []
 
     # Filter für die relevanten Runs
@@ -158,41 +156,20 @@ def perform_mcnemar_test_by_prompt(df, run_name_I, run_name_II):
 
     return results
 
+
+# Berechnet die Verbesserungsrate und das 95%-Konfidenzintervall
 def calculate_improvement_rate_and_confidence_interval(df, run_name, iteration_x, iteration_y):
-    """
-    Berechnet die Verbesserungsrate und das 95%-Konfidenzintervall für den Vergleich zwischen zwei Iterationen.
-
-    :param df: DataFrame mit den Daten.
-    :param run_name: Name des Runs (z.B., "Prompt A run 1").
-    :param iteration_x: Name der vorherigen Iteration (z.B., "Iteration 1").
-    :param iteration_y: Name der nachfolgenden Iteration (z.B., "Iteration 2").
-    :return: DataFrame mit Verbesserungsrate und Konfidenzintervall für jedes Modell.
-    """
     results = []
-
-    # Filtern der Daten für den spezifischen Run und t=0
     run_data = df[(df["run"] == run_name) & (df["temperature"] == 0)]
-
     for model in run_data["Modellname"].unique():
         model_data = run_data[run_data["Modellname"] == model]
-
-        # Anzahl der Fehler in Iteration X
         failures_x = len(model_data[model_data[iteration_x] == False])
-
-        # Anzahl der Erfolge in Iteration Y, die in Iteration X Fehler waren
         successes_y = len(model_data[(model_data[iteration_x] == False) & (model_data[iteration_y] == True)])
-
-        # Berechnen der Verbesserungsrate
         improvement_rate = successes_y / failures_x if failures_x > 0 else 0
-
-        # Berechnen des 95%-Konfidenzintervalls
         if failures_x > 0:
-            ci_low, ci_high = binom.interval(0.95, failures_x, improvement_rate)
-            ci_low /= failures_x
-            ci_high /= failures_x
+            ci_low, ci_high = smp.proportion_confint(successes_y, failures_x, alpha=0.05, method='wilson')
         else:
             ci_low, ci_high = None, None
-
         results.append({
             "model": model,
             "run": run_name,
@@ -201,17 +178,12 @@ def calculate_improvement_rate_and_confidence_interval(df, run_name, iteration_x
             "CI_lower": ci_low,
             "CI_upper": ci_high
         })
-
     return pd.DataFrame(results)
 
-def calculate_success_rate_by_error_type(df, run_name):
-    """
-    Berechnet die Erfolgsrate und das 95%-Konfidenzintervall für jeden Fehlertyp in Iteration 1 (bei t=0).
 
-    :param df: DataFrame mit den Daten.
-    :param run_name: Name des Runs, der analysiert werden soll (z.B., "Prompt A run 1").
-    :return: DataFrame mit Erfolgsrate und Konfidenzintervall für jedes Modell und jeden Fehlertyp.
-    """
+# Berechnet die Erfolgsrate und das 95%-Konfidenzintervall für jeden Fehlertyp
+def calculate_success_rate_by_error_type(df, run_name):
+
     results = []
 
     # Filtern der Daten für den spezifischen Run und t=0
@@ -231,11 +203,9 @@ def calculate_success_rate_by_error_type(df, run_name):
             # Erfolgsrate berechnen
             success_rate = successes / total_attempts if total_attempts > 0 else 0
 
-            # 95%-Konfidenzintervall berechnen
+            # 95%-Konfidenzintervall berechnen mit Wilson-Score-Intervall
             if total_attempts > 0:
-                ci_low, ci_high = binom.interval(0.95, total_attempts, success_rate)
-                ci_low /= total_attempts
-                ci_high /= total_attempts
+                ci_low, ci_high = smp.proportion_confint(successes, total_attempts, alpha=0.05, method='wilson')
             else:
                 ci_low, ci_high = None, None
 
@@ -249,12 +219,11 @@ def calculate_success_rate_by_error_type(df, run_name):
 
     return pd.DataFrame(results)
 
-def perform_mcnemar_test_by_error_type(df, run_name):
-    """
-    Führt für jedes Modell einen McNemar-Test durch, um den Einfluss des Fehlertyps zu evaluieren.
-    Es werden jeweils zwei Fehlertypen miteinander verglichen.
-    Es werden nur die Daten aus Iteration 1, t=0 und dem angegebenen Run verwendet.
-    """
+
+# Führt für jedes Modell einen McNemar-Test durch, um den Einfluss des Fehlertyps zu evaluieren.
+# Auskommentiert, Begründung in der Masterarbeit.
+"""def perform_mcnemar_test_by_error_type(df, run_name):
+    
     results = []
     # Filtere nach t=0 und dem spezifischen Run
     filtered_data = df[(df["temperature"] == 0) & (df["run"] == run_name)]
@@ -323,12 +292,92 @@ def perform_mcnemar_test_by_error_type(df, run_name):
                 })
 
 
-    return results
+    return results"""
 
+
+# Berechnet die Effektstärke (Cohen's h) je Modell basierend auf den Erfolgsraten in Iteration 1 für die verschiedenen Temperaturstufen.
+def calculate_effect_size_by_temperature(df, run_name):
+
+    results = []
+
+    # Daten für den spezifischen Run filtern
+    run_data = df[df["run"] == run_name]
+
+    for model in run_data["Modellname"].unique():
+        model_data = run_data[run_data["Modellname"] == model]
+
+        # Erfolgsrate für jede Temperatur berechnen
+        success_rates = {}
+        for temperature in model_data["temperature"].unique():
+            temp_data = model_data[model_data["temperature"] == temperature]
+            successes = temp_data["solution"].sum()
+            total_attempts = len(temp_data)
+            success_rates[temperature] = successes / total_attempts if total_attempts > 0 else 0
+
+        # Berechnung der Effektstärke für jede Paarung von Temperaturen
+        temperatures = sorted(success_rates.keys())
+        for i in range(len(temperatures)):
+            for j in range(i + 1, len(temperatures)):
+                t1 = temperatures[i]
+                t2 = temperatures[j]
+                p1 = success_rates[t1]
+                p2 = success_rates[t2]
+
+                # Effektstärke (Cohen's h) berechnen
+                cohen_h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(p2)))
+
+                results.append({
+                    "model": model,
+                    "run": run_name,
+                    "temperature_comparison": f"{t1} vs {t2}",
+                    "success_rate_t1": p1,
+                    "success_rate_t2": p2,
+                    #betrag von cohen_h
+                    "effect_size_cohen_h": abs(cohen_h)
+                })
+    return pd.DataFrame(results)
+
+
+# Berechnet die Effektstärke (Cohen's h) für den Vergleich der Erfolgsraten zwischen Prompt A run 1 und Prompt B run 1.
+def calculate_effect_size_between_prompts(df):
+
+    results = []
+
+    # Filtern der Daten für Prompt A run 1 und Prompt B run 1, Iteration 1 und t=0
+    filtered_data = df[
+        (df["run"].isin(["Prompt A run 1", "Prompt B run 1"])) &
+        (df["temperature"] == 0)
+        ]
+
+    for model in filtered_data["Modellname"].unique():
+        model_data = filtered_data[filtered_data["Modellname"] == model]
+
+        # Erfolgsrate für jeden Prompt berechnen
+        success_rates = {}
+        for run in ["Prompt A run 1", "Prompt B run 1"]:
+            run_data = model_data[model_data["run"] == run]
+            successes = run_data["Iteration 1"].sum() # Anzahl der True-Werte in Iteration 1
+            total_attempts = len(run_data) # Gesamtzahl der Aufgaben
+            success_rates[run] = successes / total_attempts if total_attempts > 0 else 0
+
+        # Effektstärke (Cohen's h) berechnen
+        p1 = success_rates["Prompt A run 1"]
+        p2 = success_rates["Prompt B run 1"]
+        cohen_h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(p2)))
+
+        results.append({
+            "model": model,
+            "success_rate_prompt_A": p1,
+            "success_rate_prompt_B": p2,
+            "effect_size_cohen_h": abs(cohen_h)
+        })
+
+    return pd.DataFrame(results)
+
+
+# Wendet eine Korrektur für multiples Testen auf die p-Werte in den Ergebnissen an.
 def apply_multiple_test_correction(results, method='fdr_by'):
-    """
-    Wendet eine Korrektur für multiples Testen auf die p-Werte in den Ergebnissen an.
-    """
+
     p_vals_with_index = [(i, r["p-value"]) for i, r in enumerate(results) if r["p-value"] is not None]
     p_vals_with_index.sort(key=lambda x: x[1])
     indices, p_vals = zip(*p_vals_with_index)
@@ -403,20 +452,29 @@ if __name__ == "__main__":
 
     print("\n=== Stabilität der Verbesserungsraten (Iteration 2 vs. Iteration 1) ===")
     print(stability_df)
-    stability_df.to_csv("stability_results.csv")
+
 
     # === McNemar-Test für Fehlertypen ===
-    error_results = perform_mcnemar_test_by_error_type(prepared_data, "Prompt A run 1")
+    """error_results = perform_mcnemar_test_by_error_type(prepared_data, "Prompt A run 1")
     error_results = apply_multiple_test_correction(error_results, method='holm')
 
     print("\n=== McNemar-Test by Error Type (Holm-korrigiert) ===")
     for res in error_results:
-        print(res)
+        print(res)"""
 
     # === Erfolgsrate nach Fehlertyp ===
     success_rate_results = calculate_success_rate_by_error_type(prepared_data, "Prompt A run 1")
     print("\n=== Success Rate by Error Type ===")
     print(success_rate_results)
 
+    # === Cohens H für Effektstärke ===
 
+    effect_size_results = calculate_effect_size_by_temperature(prepared_data, "Prompt B run 1")
+    print("\n=== Effect Size (Cohen's h) by Model & Temperature ===")
+    print(effect_size_results)
+
+    # === Cohens H für Effektstärke zwischen Prompts ===
+    print("\n=== Effect Size (Cohen's h) between Prompts ===")
+    effect_size_between_prompts = calculate_effect_size_between_prompts(prepared_data)
+    print(effect_size_between_prompts)
 
