@@ -19,4 +19,4 @@ Das vorliegende Skript dient der Automatisierung der statistischen Tests und der
 
 **Hinweis:**
 
-*   Um das Visual-Skript ausführen zu lassen, kann im Dockerfile  (`Statistical_Tests.py`) durch (`Visuals.py`) ersetzen.
+*   Um das Visual-Skript ausführen zu lassen, kann im Dockerfile  (`Statistical_Tests.py`) durch (`Visuals.py`) ersetzt werden.
