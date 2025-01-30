@@ -400,10 +400,10 @@ def apply_multiple_test_correction(results, method='fdr_by'):
 if __name__ == "__main__":
     # Pfade definieren
     paths = [
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 1",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 2",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 3",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt B run 1"
+        r"Ergebnisse/Prompt A run 1",
+        r"Ergebnisse/Prompt A run 2",
+        r"Ergebnisse/Prompt A run 3",
+        r"Ergebnisse/Prompt B run 1"
     ]
 
     prepared_data = load_and_prepare_data(paths)
