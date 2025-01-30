@@ -1,0 +1,73 @@
+Task,Iteration 1,Iteration 2,Iteration 3
+Task_BigCodeBench_360_runtimeerror,false,true,false
+Task_BigCodeBench_574_runtimeerror,false,true,false
+Task_BigCodeBench_19_syntaxerror,false,true,false
+Task_BigCodeBench_267_logicerror,false,true,false
+Task_BigCodeBench_161_runtimeerror,false,false,false
+Task_BigCodeBench_942_syntaxerror,false,false,false
+Task_BigCodeBench_1085_logicerror,false,true,false
+Task_BigCodeBench_417_runtimeerror,false,true,false
+Task_BigCodeBench_723_runtimeerror,false,false,false
+Task_BigCodeBench_367_runtimeerror,true,false,false
+Task_BigCodeBench_553_logicerror,true,false,false
+Task_BigCodeBench_92_logicerror,false,false,true
+Task_BigCodeBench_1085_runtimeerror,true,false,false
+Task_BigCodeBench_417_syntaxerror,false,true,false
+Task_BigCodeBench_1039_runtimeerror,false,true,false
+Task_BigCodeBench_906_logicerror,true,false,false
+Task_BigCodeBench_906_syntaxerror,true,false,false
+Task_BigCodeBench_723_syntaxerror,false,true,false
+Task_BigCodeBench_187_logicerror,true,false,false
+Task_BigCodeBench_92_syntaxerror,false,true,false
+Task_BigCodeBench_1039_syntaxerror,false,false,false
+Task_BigCodeBench_942_runtimeerror,false,false,false
+Task_BigCodeBench_955_logicerror,false,true,false
+Task_BigCodeBench_985_syntaxerror,true,false,false
+Task_BigCodeBench_161_syntaxerror,true,false,false
+Task_BigCodeBench_13_logicerror,true,false,false
+Task_BigCodeBench_13_runtimeerror,true,false,false
+Task_BigCodeBench_916_runtimeerror,false,false,false
+Task_BigCodeBench_955_runtimeerror,false,true,false
+Task_BigCodeBench_360_syntaxerror,true,false,false
+Task_BigCodeBench_367_syntaxerror,false,true,false
+Task_BigCodeBench_553_syntaxerror,false,true,false
+Task_BigCodeBench_579_syntaxerror,false,true,false
+Task_BigCodeBench_574_logicerror,false,true,false
+Task_BigCodeBench_942_logicerror,true,false,false
+Task_BigCodeBench_916_syntaxerror,false,false,false
+Task_BigCodeBench_19_runtimeerror,true,false,false
+Task_BigCodeBench_916_logicerror,false,false,false
+Task_BigCodeBench_360_logicerror,false,false,true
+Task_BigCodeBench_417_logicerror,false,false,true
+Task_BigCodeBench_579_logicerror,false,false,true
+Task_BigCodeBench_187_syntaxerror,true,false,false
+Task_BigCodeBench_985_runtimeerror,true,false,false
+Task_BigCodeBench_92_runtimeerror,true,false,false
+Task_BigCodeBench_1039_logicerror,false,false,false
+Task_BigCodeBench_574_syntaxerror,true,false,false
+Task_BigCodeBench_723_logicerror,false,false,true
+Task_BigCodeBench_553_runtimeerror,true,false,false
+Task_BigCodeBench_267_syntaxerror,false,true,false
+Task_BigCodeBench_187_runtimeerror,true,false,false
+Task_BigCodeBench_955_syntaxerror,true,false,false
+Task_BigCodeBench_267_runtimeerror,false,false,false
+Task_BigCodeBench_985_logicerror,true,false,false
+Task_BigCodeBench_1085_syntaxerror,true,false,false
+Task_BigCodeBench_367_logicerror,false,true,false
+Task_BigCodeBench_161_logicerror,false,false,false
+Task_BigCodeBench_906_runtimeerror,true,false,false
+Task_BigCodeBench_19_logicerror,true,false,false
+Task_BigCodeBench_579_runtimeerror,false,false,false
+Task_BigCodeBench_13_syntaxerror,true,false,false
+
+Globale Statistik
+Gesamtanzahl Tests,60
+Erfolgreiche Tests,48
+Fehlgeschlagene Tests,12
+Erfolgsquote,80.00%
+
+Iterations-Statistik
+Iteration,Tests insgesamt,Erfolgreiche Tests,Fehlgeschlagene Tests,Erfolgsquote
+1,60,25,35,41.67%
+2,35,18,17,51.43%
+3,17,5,12,29.41%
