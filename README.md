@@ -3,6 +3,10 @@
 **Hintergrund**
 Das vorliegende Skript dient der Automatisierung der statistischen Tests und der Erstellung der grafischen Elemente. 
 
+**Voraussetzungen:**
+
+*   **Docker:** Das Skript ist für die Ausführung in einem Docker-Container konzipiert.
+
 **Ausführung:**
 
 1.  Docker-Image erstellen:
