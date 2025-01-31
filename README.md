@@ -15,7 +15,7 @@ Das vorliegende Skript dient der Automatisierung der statistischen Tests und der
     ```
 **Ausgabe:**
 
-*   **Konsolenausgabe:** Zeigt den die Ergebnisse der Tests.
+*   **Konsolenausgabe:** Zeigt die Ergebnisse der Tests.
 
 **Hinweis:**
 
