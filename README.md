@@ -24,4 +24,4 @@ Das vorliegende Skript dient der Automatisierung der statistischen Tests und der
 **Hinweis:**
 
 *   Um das Visual-Skript ausführen zu lassen, kann im Dockerfile  (`Statistical_Tests.py`) durch (`Visuals.py`) ersetzt werden.
-*   Manche Funktionsaufrufe wurden speziell angepasst um eine bestimmte Grafik zu erzeugen. Die genauen Details, wie sich die jeweilige Grafik zusammensetzt ist in der Arbeit hinterlegt. 
+*   Manche Funktionsaufrufe wurden speziell angepasst um eine bestimmte Grafik zu erzeugen. Die genauen Details, wie sich die jeweilige Grafik zusammensetzt sind in der Masterarbeit unter der jeweiligen Abbildung zu finden.
