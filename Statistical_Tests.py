@@ -375,6 +375,38 @@ def calculate_effect_size_between_prompts(df):
     return pd.DataFrame(results)
 
 
+# Berechnet die Standardabweichung der Erfolgsraten in Iteration 1 pro Modell und Temperatur für die angegebenen Runs.
+def calculate_std_iteration1_per_model_temperature(df, run1, run2, run3):
+
+    # Filtere die Daten für die gewünschten Runs
+    filtered_df = df[df["run"].isin([run1, run2, run3])]
+
+    # Berechne pro Modell, Temperatur und Run die Erfolgsrate in Iteration 1.
+    # Da Iteration 1 boolesch ist, entspricht der Mittelwert der Erfolgsrate.
+    success_rates = (
+        filtered_df
+        .groupby(["Modellname", "temperature", "run"])["Iteration 1"]
+        .mean()
+        .reset_index(name="success_rate")
+    )
+    # Erfolgsrate von einem Wert zwischen 0 und 1 in Prozent umrechnen
+    success_rates["success_rate"] = success_rates["success_rate"] * 100
+
+    # Gruppiere nun nach Modell und Temperatur und berechne die Standardabweichung der Erfolgsraten über die Runs.
+    std_df = (
+        success_rates
+        .groupby(["Modellname", "temperature"])["success_rate"]
+        .std()
+        .reset_index(name="std_iteration1")
+    )
+    # Multipliziere die Standardabweichung mit 100, um sie in Prozent darzustellen.
+    std_df["std_iteration1"] = std_df["std_iteration1"].round(1)
+
+
+    return std_df
+
+
+
 # Wendet eine Korrektur für multiples Testen auf die p-Werte in den Ergebnissen an.
 def apply_multiple_test_correction(results, method='fdr_by'):
 
@@ -477,4 +509,10 @@ if __name__ == "__main__":
     print("\n=== Effect Size (Cohen's h) between Prompts ===")
     effect_size_between_prompts = calculate_effect_size_between_prompts(prepared_data)
     print(effect_size_between_prompts)
+
+    # === Standardabweichung der Erfolgsraten in Iteration 1 pro Modell und Temperatur ===
+    std_iteration1_results = calculate_std_iteration1_per_model_temperature(prepared_data, "Prompt A run 1", "Prompt A run 2", "Prompt A run 3")
+    print("\n=== Standardabweichung der Erfolgsraten in Iteration 1 pro Modell und Temperatur ===")
+    print(std_iteration1_results)
+
 
