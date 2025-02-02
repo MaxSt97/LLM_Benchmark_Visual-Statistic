@@ -38,7 +38,6 @@ def load_and_prepare_data(paths):
 
     # Nur Iteration 1 als Indikator für Erfolg
     df["solution"] = df["Iteration 1"]
-
     # DF Spalte Task filtern, sodass nur Daten enthalten sind, die mit Task_ beginnen
     df = df[df["Task"].str.startswith("Task")]
 
@@ -396,7 +395,7 @@ def calculate_std_iteration1_per_model_temperature(df, run1, run2, run3):
     std_df = (
         success_rates
         .groupby(["Modellname", "temperature"])["success_rate"]
-        .std()
+        .std(ddof=0)
         .reset_index(name="std_iteration1")
     )
     # Multipliziere die Standardabweichung mit 100, um sie in Prozent darzustellen.
@@ -472,7 +471,7 @@ if __name__ == "__main__":
     improvement_results_all_runs = pd.concat(improvement_results.values())
     pivot_table = improvement_results_all_runs.pivot_table(index="model", columns="run", values="improvement_rate")
 
-    std_dev = pivot_table.std(axis=1)
+    std_dev = pivot_table.std(axis=1,ddof=0)
     mean_improvement_rate = pivot_table.mean(axis=1)
     variation_coefficient = std_dev / mean_improvement_rate
 
