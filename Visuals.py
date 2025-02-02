@@ -8,7 +8,7 @@ import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 import seaborn as sns
 
-matplotlib.use('TkAgg')  # Oder 'TkAgg' für interaktive Backends
+matplotlib.use('TkAgg')
 
 
 # Rohdaten werden vorbereitet.
