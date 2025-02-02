@@ -24,5 +24,6 @@ Das vorliegende Skript dient der Automatisierung der statistischen Tests und der
 **Hinweis:**
 
 *   Um das Visual-Skript ausführen zu lassen, kann im Dockerfile  (`Statistical_Tests.py`) durch (`Visuals.py`) ersetzt werden.
+*   Ersetze `plt.show()` durch `plt.savefig('/app/plots/name_der_datei.png')`, um die Plots in Dateien zu speichern. Stelle sicher, dass das Verzeichnis `/app/plots` innerhalb des Docker-Containers existiert.
 *   Manche Funktionsaufrufe wurden speziell angepasst um eine bestimmte Grafik zu erzeugen. Die genauen Details, wie sich die jeweilige Grafik zusammensetzt sind in der Masterarbeit unter der jeweiligen Abbildung zu finden.
 *   Docker-Desktop muss auf dem Rechner installiert und aktiv sein.
