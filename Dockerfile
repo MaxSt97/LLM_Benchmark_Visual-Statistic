@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Arbeitsverzeichnis
 WORKDIR /app
 
-# Nur tk-dev installieren
+# Installieren der Systemabhängigkeiten
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tk-dev \
     && rm -rf /var/lib/apt/lists/*
