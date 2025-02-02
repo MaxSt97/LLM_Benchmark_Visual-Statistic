@@ -718,10 +718,10 @@ def plot_iteration_scores(df, run_name, temperature, sort_by_score=True):
 # Hauptprogramm
 if __name__ == "__main__":
     paths = [
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 1",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 2",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt A run 3",
-        r"C:\Users\MaximilianStoepler\OneDrive - Deutsche Bahn\Studium\Masterarbeit\Ergebnisse\Prompt B run 1"
+        r"Ergebnisse/Prompt A run 1",
+        r"Ergebnisse/Prompt A run 2",
+        r"Ergebnisse/Prompt A run 3",
+        r"Ergebnisse/Prompt B run 1"
     ]
 
     prepared_data = load_and_prepare_data(paths)
