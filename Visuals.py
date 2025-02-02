@@ -54,13 +54,13 @@ def load_and_prepare_data(paths):
 
     df["error"] = df["Task"].apply(lambda x: x.rsplit("_", 1)[-1])
 
-    # Verwende nur die Ergebnisse der Iteration 1 für "solution"
+    # Solution-Spalte hinzufügen, die True ist, wenn eine der Iterationen erfolgreich war
     df["solution"] = df["Iteration 1"]
     # add column which is true if iteration 1 or 2 is true
     df['solution_final_it12'] = df[['Iteration 1', 'Iteration 2']].any(axis=1)
     df['solution_final_it123'] = df[['Iteration 1', 'Iteration 2', 'Iteration 3']].any(axis=1)
 
-    #filter df column Task to only contain elements which start with "Task"
+    # Filtere Daten auf Zellen, die mit "Task" beginnen
     df = df[df['Task'].str.startswith("Task")]
 
     return df
@@ -205,8 +205,8 @@ def plot_mean_success_rate_per_iteration(df, temperature, run_name):
 
     # Farben für die Modelle definieren
     colors = {
-        "anthropic_claude-3.5-haiku-20241022": "#f5b102",
         "anthropic_claude-3-5-sonnet-20241022": "#e86818",
+        "anthropic_claude-3.5-haiku-20241022": "#f5b102",
         "deepseek_deepseek-chat": "#e2225c",
         "google_gemini-flash-1.5": "#e84cf3",
         "google_gemini-pro-1.5": "#22bad6",
@@ -214,6 +214,8 @@ def plot_mean_success_rate_per_iteration(df, temperature, run_name):
         "openai_gpt-4o-mini-2024-07-18": "#3e8600",
         "qwen_qwen-2.5-coder-32b-instruct": "#a3d96a",
     }
+
+
 
     # Neues Figure-Objekt erstellen
     fig = plt.figure(figsize=(16, 6))
@@ -725,7 +727,7 @@ if __name__ == "__main__":
     prepared_data = load_and_prepare_data(paths)
 
     # Liniendiagramm der durchschnittlichen Erfolgsraten je Temeratur plotten über alle Runs (Prompt A) in paths
-    plot_mean_success_rate(prepared_data, "Prompt A run 2", "Prompt A run 3", "Prompt A run 2")
+    plot_mean_success_rate(prepared_data, "Prompt A run 1", "Prompt A run 1", "Prompt A run 1")
 
     # Liniendiagramm der durchschnittlichen Erfolgsraten pro Iteration für t=0, 0.5 und 1 plotten
     for temperature in [0, 0.5, 1]:
