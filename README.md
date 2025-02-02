@@ -1,7 +1,7 @@
 # LLM_Benchmark_Visual-Statistic
 
 **Hintergrund**
-Das vorliegende Skript dient der Automatisierung der statistischen Tests und der Erstellung der grafischen Elemente. Sie wurden im Rahmen einer Masterarbeit genutzt. Alle weiteren relevanten Informationen sind in dieser zu finden.
+Das vorliegende Skript dient der Automatisierung der statistischen Tests und der Erstellung der grafischen Elemente. Sie wurden im Rahmen einer Masterarbeit genutzt. Alle weiteren relevanten Informationen sind in der schriftlichen Ausführung enthalten.
 
 **Voraussetzungen:**
 
