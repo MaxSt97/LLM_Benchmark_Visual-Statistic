@@ -25,3 +25,4 @@ Das vorliegende Skript dient der Automatisierung der statistischen Tests und der
 
 *   Um das Visual-Skript ausführen zu lassen, kann im Dockerfile  (`Statistical_Tests.py`) durch (`Visuals.py`) ersetzt werden.
 *   Manche Funktionsaufrufe wurden speziell angepasst um eine bestimmte Grafik zu erzeugen. Die genauen Details, wie sich die jeweilige Grafik zusammensetzt sind in der Masterarbeit unter der jeweiligen Abbildung zu finden.
+*   Docker-Desktop muss auf dem Rechner installiert und aktiv sein.
