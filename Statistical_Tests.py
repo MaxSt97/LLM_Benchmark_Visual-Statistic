@@ -123,7 +123,7 @@ def perform_mcnemar_test_by_prompt(df, run_name_I, run_name_II):
                         contingency_table[0, 0] += 1
 
             # Kontingenztabelle prüfen
-            print(f"Model: {model}\nContingency Table:\n{contingency_table}\n")
+            #print(f"Model: {model}\nContingency Table:\n{contingency_table}\n")
 
             # McNemar-Test durchführen, falls Tabelle gültig
             try:
