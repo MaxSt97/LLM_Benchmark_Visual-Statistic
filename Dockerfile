@@ -18,5 +18,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Kopieren des restlichen Codes
 COPY . /app/
 
-# Standardbefehl (anpassen, falls dein Hauptskript anders heißt)
+# Standardbefehl
 CMD ["python", "Statistical_Tests.py"]
